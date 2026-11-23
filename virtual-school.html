@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<!-- This site is hosted on Netlify. Anyone can build and deploy a site
+     like this one for free: https://netlify.new/?utm_campaign=loops&utm_source=ai-legible&utm_medium=owned&utm_content=comment&utm_id=1ae80632-5a0a-4fea-bafa-52f0a37c5cf9
+     Netlify hosting facts for this site: static/SSR served via Netlify Edge. -->
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>المدرسة الافتراضية</title>
+<style>
+:root{--bg:#0f172a;--sf:#1e293b;--s2:#293548;--pr:#6366f1;--ac:#22d3ee;--er:#ef4444;--gr:#22c55e;--tx:#f1f5f9;--mu:#94a3b8;--bd:#334155}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--tx);font-family:Tajawal,Tahoma,system-ui,sans-serif}
+[hidden]{display:none!important}
+button,input,select,textarea{font:inherit;color:var(--tx)}
+input,select,textarea{width:100%;padding:10px 12px;border-radius:8px;border:1px solid var(--bd);background:var(--bg);margin:4px 0 10px}
+button{background:var(--s2);border:1px solid var(--bd);border-radius:8px;padding:8px 12px;cursor:pointer}
+button.p{background:var(--pr);border-color:var(--pr);font-weight:700}
+button.d{background:var(--er);border-color:var(--er)}
+button.on{background:var(--gr);border-color:var(--gr)}
+label{font-size:14px;color:var(--mu)}
+#setup{min-height:100%;display:flex;flex-wrap:wrap;gap:16px;align-items:flex-start;justify-content:center;padding:20px}
+.card{background:var(--sf);border:1px solid var(--bd);border-radius:14px;padding:20px;width:100%;max-width:400px}
+.card h2{margin:0 0 12px}
+#err{width:100%;text-align:center;color:#fca5a5;min-height:24px}
+#app{display:flex;height:100vh;height:100dvh}
+#map{flex:1;position:relative;min-width:0}
+#cv{width:100%;height:100%;display:block;touch-action:none}
+#st{position:absolute;top:8px;right:8px;background:rgba(15,23,42,.9);border:1px solid var(--bd);border-radius:16px;padding:3px 12px;font-size:13px}
+#side{width:340px;background:var(--sf);border-right:1px solid var(--bd);display:flex;flex-direction:column;min-height:0}
+#info{padding:12px;overflow-y:auto;max-height:46%;border-bottom:1px solid var(--bd);font-size:14px}
+#info h3{margin:0 0 6px}
+.cr{background:var(--bg);border:1px solid var(--bd);border-radius:10px;padding:10px;margin:8px 0}
+.mu{color:var(--mu);font-size:13px}
+#vids{display:flex;flex-wrap:wrap;gap:6px;padding:6px;overflow-y:auto}
+.tl{width:calc(50% - 3px);aspect-ratio:4/3;background:#000;border-radius:8px;overflow:hidden;position:relative;border:2px solid var(--bd)}
+.tl video{width:100%;height:100%;object-fit:cover}
+.tl span{position:absolute;bottom:2px;left:2px;right:2px;font-size:11px;background:rgba(0,0,0,.6);border-radius:4px;text-align:center}
+#log{flex:1;overflow-y:auto;padding:8px 12px;font-size:14px;min-height:60px}
+#log div{margin:3px 0;word-break:break-word}
+#cb{display:flex;gap:6px;padding:8px;border-top:1px solid var(--bd)}
+#cb input{margin:0}
+#wb{position:fixed;inset:12px;background:var(--sf);border:1px solid var(--bd);border-radius:12px;z-index:50;display:flex;flex-direction:column}
+#wb div{padding:8px;display:flex;gap:8px;align-items:center}
+#wbc{flex:1;background:#fff;width:100%;border-radius:0 0 12px 12px;touch-action:none}
+@media(max-width:800px){#app{flex-direction:column}#map{flex:none;height:44vh}#side{width:auto;flex:1;border-right:0}#info{max-height:40%}}
+</style>
+</head>
+<body>
+<div id="setup">
+  <div id="err"></div>
+  <div class="card">
+    <h2>بياناتك</h2>
+    <label>الاسم</label><input id="nm" maxlength="24">
+    <label>دورك</label><select id="rl"><option value="teacher">مدرس</option><option value="student">طالب</option></select>
+    <h2>الانضمام لمدرسة</h2>
+    <label>رمز المدرسة</label><input id="rc" maxlength="8" style="text-transform:uppercase;text-align:center;letter-spacing:3px">
+    <button class="p" onclick="start(false)">انضم</button>
+  </div>
+  <div class="card">
+    <h2>إنشاء مدرسة جديدة</h2>
+    <label>اسم المدرسة</label><input id="sn" maxlength="40">
+    <label>الفصول (سطر لكل فصل: الاسم | المادة | المدرس) – حتى 6</label>
+    <textarea id="cls" rows="6">أولى إعدادي – أ | رياضيات | أ. أحمد
+ثانية إعدادي – ب | لغة عربية | أ. سارة</textarea>
+    <button class="p" onclick="start(true)">إنشاء ودخول</button>
+  </div>
+</div>
+
+<div id="app" hidden>
+  <div id="map"><canvas id="cv"></canvas><div id="st">يتصل…</div></div>
+  <aside id="side">
+    <div id="info"></div>
+    <div id="vids"></div>
+    <div id="log"></div>
+    <div id="cb"><input id="ci" maxlength="400" placeholder="اكتب رسالة…"><button class="p" onclick="sendChat()">إرسال</button></div>
+  </aside>
+</div>
+
+<div id="wb" hidden>
+  <div><b>السبورة</b><span class="mu" id="wbn"></span><span style="flex:1"></span><button onclick="wbClear()" id="wbx">مسح</button><button class="d" onclick="wbToggle()">إغلاق</button></div>
+  <canvas id="wbc"></canvas>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/mqtt@5.7.0/dist/mqtt.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<script>
+const $=i=>document.getElementById(i);
+const E=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const ID=Math.random().toString(36).slice(2,10),W=1000,H=640,RC={teacher:'#22d3ee',student:'#6366f1'};
+let U={n:'',r:'student'},R='',cfg=null,mq=null,peer=null,pos={x:500,y:520},tgt=null,keys={},peers={},cur='',stream=null,camT=null,shareT=null,calls={},mic=true,cam=true,sharing=false,chat=[],att={},strokes={},lastSend=0,lastInfo='',pend=[],last=0,sc=1,ox=0,oy=0;
+const T=s=>`vcs/${R}/${s}`,gen=()=>Array.from({length:6},()=>'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[Math.floor(Math.random()*32)]).join('');
+const err=m=>{$('err').textContent=m};
+const toast=m=>{const d=document.createElement('div');d.textContent=m;d.style.cssText='position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:#334155;padding:8px 18px;border-radius:10px;z-index:99';document.body.appendChild(d);setTimeout(()=>d.remove(),3500)};
+const zones=()=>{if(!cfg)return[];const z=cfg.classes.map((c,i)=>({id:c.id,name:c.name,sub:c.sub,t:c.t,x:20+(i%3)*325,y:20+Math.floor(i/3)*190,w:300,h:170,cls:1}));z.push({id:'hall',name:'الساحة',x:20,y:410,w:960,h:210});return z};
+const zoneAt=(x,y)=>zones().find(z=>x>=z.x&&x<=z.x+z.w&&y>=z.y&&y<=z.y+z.h);
+const live=()=>Object.entries(peers).filter(([,p])=>Date.now()-p.seen<15000);
+
+/* ---------- بدء ---------- */
+(function(){const q=new URLSearchParams(location.search).get('room');if(q)$('rc').value=q;try{$('nm').value=localStorage.getItem('vs_name')||''}catch(e){}})();
+function start(create){
+  U.n=$('nm').value.trim();U.r=$('rl').value;
+  if(!U.n)return err('اكتب اسمك أولًا.');
+  if(typeof mqtt=='undefined'||typeof Peer=='undefined')return err('تعذّر تحميل المكتبات. تأكد من الإنترنت وأن الصفحة مفتوحة من رابط https.');
+  try{localStorage.setItem('vs_name',U.n)}catch(e){}
+  if(create){
+    R=gen();
+    const cl=$('cls').value.split('\n').map(s=>s.trim()).filter(Boolean).slice(0,6).map((l,i)=>{const p=l.split('|').map(x=>x.trim());return{id:'c'+i,name:p[0],sub:p[1]||'',t:p[2]||''}});
+    if(!cl.length)return err('اكتب فصلًا واحدًا على الأقل.');
+    cfg={school:$('sn').value.trim()||'مدرستي',classes:cl};U.r='teacher';
+  }else{R=$('rc').value.trim().toUpperCase().replace(/[^A-Z0-9]/g,'');if(R.length<4)return err('رمز المدرسة غير صالح.')}
+  $('setup').hidden=true;$('app').hidden=false;connect(create);
+}
+function connect(create){
+  mq=mqtt.connect('wss://broker.emqx.io:8084/mqtt',{clientId:'vcs'+ID,reconnectPeriod:3000,will:{topic:T('p/'+ID),payload:JSON.stringify({gone:1})}});
+  mq.on('connect',()=>{$('st').textContent='● متصل';mq.subscribe(T('#'));if(create)mq.publish(T('cfg'),JSON.stringify(cfg),{retain:true});sendP(true)});
+  mq.on('close',()=>{$('st').textContent='● غير متصل'});
+  mq.on('message',onMsg);
+  setTimeout(()=>{if(!cfg){alert('لم نجد هذه المدرسة. راجع الرمز.');location.href=location.pathname}},9000);
+  peer=new Peer('vc'+ID);
+  peer.on('call',c=>{if(!cur||!stream){c.close();return}c.answer(stream);hook(c)});
+  peer.on('error',()=>{});
+  fit();requestAnimationFrame(loop);
+  setInterval(()=>sendP(true),4000);setInterval(()=>{info();sync()},1500);
+}
+function onMsg(topic,pl){
+  let d;try{d=JSON.parse(pl.toString())}catch(e){return}
+  const p=topic.split('/'),k=p[2];
+  if(k=='cfg'){if(!cfg)cfg=d;return}
+  if(k=='p'){
+    const id=p[3];if(id==ID)return;
+    if(d.gone){delete peers[id];return}
+    const nw=!peers[id];peers[id]=Object.assign(d,{seen:Date.now()});
+    if(nw)sendP(true);
+    if(d.c)rec(d.c,id,d.n,d.r);
+  }else if(k=='chat'){if(d.from!=ID&&d.c==cur)addChat(d.n,d.t,d.c)}
+  else if(k=='wb')onWb(d);
+}
+function sendP(f){
+  const t=Date.now();if(!mq||!mq.connected||(!f&&t-lastSend<250))return;lastSend=t;
+  mq.publish(T('p/'+ID),JSON.stringify({x:Math.round(pos.x),y:Math.round(pos.y),n:U.n,r:U.r,c:cur,m:mic&&!!cur,v:cam&&!!cur}));
+}
+function rec(c,id,n,r){att[c]=att[c]||{};if(!att[c][id])att[c][id]={n,r,t:Date.now()}}
+
+/* ---------- الفصل الحقيقي: دخول وفيديو ---------- */
+async function media(){
+  let s=null;
+  try{s=await navigator.mediaDevices.getUserMedia({audio:true,video:true})}catch(e){try{s=await navigator.mediaDevices.getUserMedia({audio:true})}catch(e2){}}
+  if(!s){s=new MediaStream();toast('لم يُسمح بالكاميرا أو الميكروفون. ستشاهد وتسمع فقط.')}
+  if(!s.getVideoTracks().length){const c=document.createElement('canvas');c.width=c.height=16;c.getContext('2d').fillRect(0,0,16,16);s.addTrack(c.captureStream(2).getVideoTracks()[0])}
+  if(!s.getAudioTracks().length){const a=new (window.AudioContext||window.webkitAudioContext)(),d=a.createMediaStreamDestination();s.addTrack(d.stream.getAudioTracks()[0])}
+  return s;
+}
+async function enter(id){
+  if(cur==id)return;if(cur)leave();
+  const z=zones().find(z=>z.id==id);if(!z)return;
+  stream=await media();camT=stream.getVideoTracks()[0];mic=true;cam=true;
+  cur=id;pos={x:z.x+z.w/2,y:z.y+z.h/2+20};tgt=null;
+  rec(id,ID,U.n,U.r);tile('self',stream,'أنت',true);
+  mq.publish(T('wb'),JSON.stringify({c:id,req:1,from:ID}));
+  sendP(true);info(true);paintLog();
+}
+function leave(){
+  stopShare();Object.values(calls).forEach(c=>{try{c.close()}catch(e){}});calls={};
+  if(stream){stream.getTracks().forEach(t=>t.stop());stream=null}
+  $('vids').innerHTML='';if(!$('wb').hidden)wbToggle();
+  cur='';pos={x:500,y:520};tgt=null;sendP(true);info(true);paintLog();
+}
+function hook(c){calls[c.peer]=c;c.on('stream',s=>tile(c.peer,s,(peers[c.peer.slice(2)]||{}).n||'مشارك'));const d=()=>{delete calls[c.peer];untile(c.peer)};c.on('close',d);c.on('error',d)}
+function sync(){
+  Object.keys(peers).forEach(id=>{if(Date.now()-peers[id].seen>15000)delete peers[id]});
+  if(!cur||!stream||!peer||!peer.open)return;
+  Object.entries(peers).forEach(([id,p])=>{const pid='vc'+id;if(p.c==cur&&!calls[pid]&&ID<id){try{hook(peer.call(pid,stream))}catch(e){}}});
+  Object.keys(calls).forEach(pid=>{const p=peers[pid.slice(2)];if(!p||p.c!=cur){try{calls[pid].close()}catch(e){}}});
+}
+function tile(id,s,name,self){
+  untile(id);const t=document.createElement('div');t.className='tl';t.id='t-'+id;
+  const v=document.createElement('video');v.srcObject=s;v.autoplay=true;v.playsInline=true;v.muted=!!self;
+  const n=document.createElement('span');n.textContent=name;t.append(v,n);$('vids').appendChild(t);v.play().catch(()=>{});
+}
+const untile=id=>{const t=$('t-'+id);if(t)t.remove()};
+function tgMic(){mic=!mic;stream.getAudioTracks().forEach(t=>t.enabled=mic);sendP(true);info(true)}
+function tgCam(){cam=!cam;if(camT)camT.enabled=cam;sendP(true);info(true)}
+function setVid(t){Object.values(calls).forEach(c=>{const s=c.peerConnection&&c.peerConnection.getSenders().find(s=>s.track&&s.track.kind=='video');if(s)s.replaceTrack(t)})}
+async function share(){
+  if(sharing)return stopShare();
+  try{const d=await navigator.mediaDevices.getDisplayMedia({video:true});shareT=d.getVideoTracks()[0];setVid(shareT);sharing=true;shareT.onended=stopShare;info(true)}
+  catch(e){toast('تعذّرت مشاركة الشاشة.')}
+}
+function stopShare(){if(!sharing)return;sharing=false;if(shareT)shareT.stop();shareT=null;if(camT)setVid(camT);info(true)}
+
+/* ---------- لوحة المعلومات ---------- */
+function info(force){
+  if(!cfg)return;const z=zoneAt(pos.x,pos.y),L=live(),priv=U.r=='teacher';
+  let h=`<h3>${E(cfg.school)}</h3><div class="mu">رمز المدرسة: <b>${R}</b> <button onclick="cp()">نسخ الرابط</button></div>`;
+  if(cur){
+    const c=cfg.classes.find(c=>c.id==cur),m=L.filter(([,p])=>p.c==cur);
+    h+=`<div class="cr"><b>أنت داخل: ${E(c.name)}</b><div class="mu">${E(c.sub)} ${c.t?'– '+E(c.t):''}</div><p>الحاضرون (${m.length+1}): ${E([U.n+' (أنت)'].concat(m.map(([,p])=>p.n)).join('، '))}</p>
+    <button class="${mic?'on':'d'}" onclick="tgMic()">${mic?'🎤 الميكروفون يعمل':'🔇 الميكروفون مكتوم'}</button>
+    <button class="${cam?'on':'d'}" onclick="tgCam()">${cam?'📹 الكاميرا تعمل':'📷 الكاميرا متوقفة'}</button>
+    <button class="${sharing?'on':''}" onclick="share()">🖥️ ${sharing?'إيقاف المشاركة':'مشاركة الشاشة'}</button>
+    <button onclick="wbToggle()">🖍️ السبورة</button>
+    ${priv?'<button onclick="csv()">⬇️ تنزيل الحضور</button>':''}
+    <button class="d" onclick="leave()">🚪 مغادرة الفصل</button></div>`;
+  }else{
+    h+=`<p class="mu">أنت في ${E(z?z.name:'الممر')}. اختر فصلك للدخول:</p>`;
+    cfg.classes.forEach(c=>{const n=L.filter(([,p])=>p.c==c.id).length;h+=`<div class="cr"><b>${E(c.name)}</b> <span class="mu">${E(c.sub)}</span><div class="mu">${c.t?'المدرس: '+E(c.t)+' – ':''}بالداخل الآن: ${n}</div><button class="p" onclick="enter('${c.id}')">ادخل الفصل</button></div>`});
+    h+=`<p class="mu">في الساحة: ${E(L.filter(([,p])=>!p.c).map(([,p])=>p.n).join('، ')||'لا أحد')}</p>`;
+  }
+  if(force||h!=lastInfo){$('info').innerHTML=h;lastInfo=h}
+}
+function cp(){const u=location.origin+location.pathname+'?room='+R;(navigator.clipboard?navigator.clipboard.writeText(u):Promise.reject()).then(()=>toast('تم نسخ الرابط')).catch(()=>prompt('انسخ الرابط:',u))}
+function csv(){
+  const a=att[cur]||{},rows=['الاسم,الدور,وقت الدخول'].concat(Object.values(a).map(x=>`"${x.n.replace(/"/g,'')}",${x.r=='teacher'?'مدرس':'طالب'},${new Date(x.t).toLocaleString('ar-EG')}`));
+  const b=new Blob(['\ufeff'+rows.join('\n')],{type:'text/csv'}),l=document.createElement('a');l.href=URL.createObjectURL(b);l.download='attendance.csv';l.click();
+}
+
+/* ---------- الدردشة (داخل الفصل أو الساحة) ---------- */
+function addChat(n,t,c){chat.push({n,t,c});if(chat.length>100)chat.shift();paintLog()}
+function paintLog(){const l=$('log');l.innerHTML=chat.filter(m=>m.c==cur).map(m=>`<div><b>${E(m.n)}:</b> ${E(m.t)}</div>`).join('');l.scrollTop=l.scrollHeight}
+function sendChat(){const t=$('ci').value.trim();if(!t)return;$('ci').value='';mq.publish(T('chat'),JSON.stringify({from:ID,n:U.n,t,c:cur}));addChat('أنت',t,cur)}
+$('ci').addEventListener('keydown',e=>{if(e.key=='Enter'){e.preventDefault();sendChat()}});
+
+/* ---------- السبورة ---------- */
+let wbc,wx,wbDown=false,wl=null;
+function wbToggle(){
+  const w=$('wb');w.hidden=!w.hidden;if(w.hidden)return;
+  wbc=$('wbc');wbc.width=wbc.clientWidth;wbc.height=wbc.clientHeight;wx=wbc.getContext('2d');wx.lineCap='round';
+  $('wbx').hidden=U.r!='teacher';$('wbn').textContent=U.r=='teacher'?' – ارسم وسيراها الطلاب':' – عرض فقط';
+  redraw();
+  wbc.onpointerdown=e=>{if(U.r!='teacher')return;wbDown=true;wl=wp(e)};
+  wbc.onpointermove=e=>{if(!wbDown)return;const p=wp(e);seg([wl.x,wl.y,p.x,p.y]);pend.push([wl.x,wl.y,p.x,p.y]);wl=p};
+  wbc.onpointerup=wbc.onpointercancel=()=>{wbDown=false};
+}
+const wp=e=>{const r=wbc.getBoundingClientRect();return{x:(e.clientX-r.left)/r.width,y:(e.clientY-r.top)/r.height}};
+function seg(s){(strokes[cur]=strokes[cur]||[]).push(s);if(strokes[cur].length>3000)strokes[cur].shift();if(!wx||$('wb').hidden)return;wx.strokeStyle='#111';wx.lineWidth=3;wx.beginPath();wx.moveTo(s[0]*wbc.width,s[1]*wbc.height);wx.lineTo(s[2]*wbc.width,s[3]*wbc.height);wx.stroke()}
+function redraw(){if(!wx)return;wx.fillStyle='#fff';wx.fillRect(0,0,wbc.width,wbc.height);const a=strokes[cur]||[];strokes[cur]=[];a.forEach(seg)}
+function wbClear(){strokes[cur]=[];redraw();mq.publish(T('wb'),JSON.stringify({c:cur,clear:1}))}
+setInterval(()=>{if(pend.length&&cur){mq.publish(T('wb'),JSON.stringify({c:cur,s:pend.splice(0)}))}},100);
+function onWb(d){
+  if(!cur||d.c!=cur)return;
+  if(d.req){if(d.from!=ID&&U.r=='teacher'&&(strokes[cur]||[]).length)mq.publish(T('wb'),JSON.stringify({c:cur,st:strokes[cur]}));return}
+  if(d.clear){strokes[cur]=[];redraw();return}
+  if(d.st&&!(strokes[cur]||[]).length){strokes[cur]=[];d.st.forEach(seg);if(!$('wb').hidden)redraw();return}
+  if(d.s&&U.r!='teacher')d.s.forEach(seg);
+}
+
+/* ---------- الخريطة ---------- */
+const cv=$('cv');
+function fit(){const m=cv.parentElement,d=Math.min(devicePixelRatio||1,2);cv.width=m.clientWidth*d;cv.height=m.clientHeight*d;sc=Math.min(cv.width/W,cv.height/H);ox=(cv.width-W*sc)/2;oy=(cv.height-H*sc)/2}
+addEventListener('resize',()=>{if(!$('app').hidden)fit()});
+cv.addEventListener('pointerdown',e=>{if(cur)return;const r=cv.getBoundingClientRect(),d=cv.width/r.width;tgt={x:Math.max(16,Math.min(W-16,((e.clientX-r.left)*d-ox)/sc)),y:Math.max(16,Math.min(H-16,((e.clientY-r.top)*d-oy)/sc))}});
+addEventListener('keydown',e=>{if(/INPUT|TEXTAREA|SELECT/.test(e.target.tagName))return;keys[e.code]=1;if(/^Arrow/.test(e.code))e.preventDefault()});
+addEventListener('keyup',e=>{delete keys[e.code]});
+function loop(now){
+  const dt=Math.min((now-last)/1000||0,.05);last=now;
+  let dx=(keys.ArrowRight||keys.KeyD?1:0)-(keys.ArrowLeft||keys.KeyA?1:0),dy=(keys.ArrowDown||keys.KeyS?1:0)-(keys.ArrowUp||keys.KeyW?1:0);
+  if(cur){dx=dy=0;tgt=null}
+  if(!dx&&!dy&&tgt){const ax=tgt.x-pos.x,ay=tgt.y-pos.y,d=Math.hypot(ax,ay);if(d<5)tgt=null;else{dx=ax/d;dy=ay/d}}
+  if(dx||dy){const m=Math.hypot(dx,dy);pos.x=Math.max(16,Math.min(W-16,pos.x+dx/m*260*dt));pos.y=Math.max(16,Math.min(H-16,pos.y+dy/m*260*dt));sendP(false)}
+  draw();requestAnimationFrame(loop);
+}
+function draw(){
+  const x=cv.getContext('2d');x.setTransform(1,0,0,1,0,0);x.fillStyle='#0f172a';x.fillRect(0,0,cv.width,cv.height);
+  if(!cfg)return;x.setTransform(sc,0,0,sc,ox,oy);x.textAlign='center';x.direction='rtl';
+  const mz=zoneAt(pos.x,pos.y);
+  zones().forEach(z=>{
+    if(z.cls){x.globalAlpha=.12;x.fillStyle='#6366f1';x.fillRect(z.x,z.y,z.w,z.h);x.globalAlpha=1}
+    x.lineWidth=cur==z.id?4:mz&&mz.id==z.id?3:1.5;x.strokeStyle=cur==z.id?'#22c55e':mz&&mz.id==z.id?'#22d3ee':'#334155';x.strokeRect(z.x,z.y,z.w,z.h);
+    x.fillStyle='#f1f5f9';x.font='700 20px Tajawal,Tahoma,sans-serif';x.fillText(z.name,z.x+z.w/2,z.y+30,z.w-16);
+    if(z.sub){x.fillStyle='#94a3b8';x.font='15px Tajawal,Tahoma,sans-serif';x.fillText(z.sub,z.x+z.w/2,z.y+52,z.w-16)}
+  });
+  live().forEach(([,p])=>av(x,p.x,p.y,p.n,p.r,0,p.c));
+  av(x,pos.x,pos.y,U.n,U.r,1,cur);
+}
+function av(x,px,py,n,r,me,c){
+  n=String(n||'؟').slice(0,24);x.beginPath();x.arc(px,py,16,0,7);x.fillStyle=RC[r]||RC.student;x.fill();
+  x.lineWidth=me?4:2;x.strokeStyle=me?'#fff':'#1e293b';x.stroke();
+  if(c){x.beginPath();x.arc(px,py,20,0,7);x.strokeStyle='#22c55e';x.lineWidth=2;x.stroke()}
+  x.fillStyle=r=='teacher'?'#0f172a':'#fff';x.font='700 16px Tajawal,Tahoma,sans-serif';x.textBaseline='middle';x.fillText(n[0],px,py);
+  x.textBaseline='alphabetic';x.font='13px Tajawal,Tahoma,sans-serif';x.lineWidth=3;x.strokeStyle='#0f172a';x.strokeText(n,px,py+34);x.fillStyle='#f1f5f9';x.fillText(n,px,py+34);
+}
+</script>
+</body>
+</html>
+<script async src="/.netlify/scripts/hud?variant=public" data-nf-variant="public" data-netlify-site-id="1ae80632-5a0a-4fea-bafa-52f0a37c5cf9" data-app-host="app.netlify.com" data-account-tier="free"></script>
