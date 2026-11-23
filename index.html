@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+<!-- This site is hosted on Netlify. Anyone can build and deploy a site
+     like this one for free: https://netlify.new/?utm_campaign=loops&utm_source=ai-legible&utm_medium=owned&utm_content=comment&utm_id=1ae80632-5a0a-4fea-bafa-52f0a37c5cf9
+     Netlify hosting facts for this site: static/SSR served via Netlify Edge. -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>مُعلِّمي الذكي | EduSpark AI</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="container topbar-inner">
+      <div class="brand">
+        <span class="brand-badge">AI</span>
+        <div>
+          <h1>مُعلِّمي الذكي</h1>
+          <p>منصة تعليمية تفاعلية متعددة الوسائط</p>
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
+        <span id="headerDoctorBadge" class="chip-btn" style="cursor: default;">
+          👨‍🏫 الدكتورة: د. نجوى الشامي
+        </span>
+      </div>
+    </div>
+  </header>
+
+  <main class="container main-content">
+    <section class="topic-card">
+      <label for="topicInput" class="topic-label">اكتب اسم الدرس أو الموضوع التعليمي:</label>
+      <div class="topic-row">
+        <input
+          type="text"
+          id="topicInput"
+          placeholder="مثال: الشبكات الحاسوبية، الدورة الدموية، الذكاء الاصطناعي..."
+          autocomplete="off"
+        />
+        <button id="generateBtn" type="button" class="primary-btn">ابدأ التعلّم الذكي</button>
+      </div>
+
+      <div class="quick-samples">
+        <span>تجربة سريعة:</span>
+        <button type="button" class="chip-btn" data-topic="الذكاء الاصطناعي وتطبيقاته">الذكاء الاصطناعي</button>
+        <button type="button" class="chip-btn" data-topic="الشبكات الحاسوبية والإنترنت">الشبكات والإنترنت</button>
+        <button type="button" class="chip-btn" data-topic="المجموعة الشمسية والكواكب">المجموعة الشمسية</button>
+      </div>
+
+      <div id="statusBar" class="status-bar hidden" role="status" aria-live="polite"></div>
+    </section>
+
+    <nav class="tabs-nav" aria-label="أقسام الدرس">
+      <button type="button" class="tab-btn active" data-tab="lessonTab">الدرس المبسط</button>
+      <button type="button" class="tab-btn" data-tab="virtualSchoolTab">المدرسة الافتراضية</button>
+      <button type="button" class="tab-btn" data-tab="visualsTab">الصور التوضيحية</button>
+      <button type="button" class="tab-btn" data-tab="videoTab">الفيديو والعرض الصوتي</button>
+      <button type="button" class="tab-btn" data-tab="gamesTab">الألعاب التفاعلية</button>
+      <button type="button" class="tab-btn" data-tab="tutorTab">المساعد الذكي</button>
+      <button type="button" class="tab-btn" data-tab="doctorTab">اختيار الدكتور</button>
+    </nav>
+  
+    <section id="lessonTab" class="tab-panel active">
+      <div class="card">
+        <h2>الشرح المبسط والملخص</h2>
+        <div id="lessonContent" class="placeholder-text">
+          اكتب عنوان درس واضغط "ابدأ التعلّم الذكي" ليظهر الشرح المبسط والنقاط الأساسية هنا.
+        </div>
+      </div>
+    </section>
+
+    <section id="virtualSchoolTab" class="tab-panel">
+      <div class="card">
+        <h2>المدرسة الافتراضية (virtual-school)</h2>
+        <div id="virtualSchoolContent">
+          <p class="placeholder-text">
+            انتقل إلى صفحة المدرسة الافتراضية <strong>virtual-school</strong> لمتابعة الفصول والجلسات التفاعلية.
+          </p>
+          <div style="margin-top: 14px; display: flex; gap: 10px; flex-wrap: wrap;">
+            <a class='primary-btn' href='/virtual-school' style='text-decoration: none; display: inline-block;'>
+              فتح صفحة المدرسة الافتراضية
+            </a>
+            <a class='secondary-btn' href='/virtual-school' rel='noopener noreferrer' style='text-decoration: none; display: inline-block;' target='_blank'>
+              فتح في نافذة جديدة
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="visualsTab" class="tab-panel">
+      <div class="card">
+        <h2>الصور التوضيحية للدرس</h2>
+        <div id="visualsContent" class="placeholder-text">
+          سيتم توليد صور توضيحية مرتبطة بالدرس هنا تلقائياً.
+        </div>
+      </div>
+    </section>
+
+    <section id="videoTab" class="tab-panel">
+      <div class="card">
+        <h2>الفيديو والعرض الصوتي التفاعلي</h2>
+        <div id="videoContent" class="placeholder-text">
+          ستظهر هنا روابط/فيديوهات مقترحة للدرس مع إمكانية تشغيل قراءة صوتية للشرح.
+        </div>
+      </div>
+    </section>
+
+    <section id="gamesTab" class="tab-panel">
+      <div class="card">
+        <h2>الألعاب التفاعلية</h2>
+        <div id="gamesContent" class="placeholder-text">
+          ستتحول مفاهيم الدرس إلى ألعاب تفاعلية هنا بمجرد توليد الدرس.
+        </div>
+      </div>
+    </section>
+    <script src="kahoot-guide.js"></script>
+    <section id="tutorTab" class="tab-panel">
+      <div class="card">
+        <h2>المساعد الذكي التفاعلي</h2>
+        <div id="tutorContent" class="placeholder-text">
+          اسأل المساعد الذكي عن أي نقطة غامضة في الدرس، أو استخدم الميكروفون للتحدث معه.
+        </div>
+      </div>
+    </section>
+
+    <section id="doctorTab" class="tab-panel">
+      <div class="card">
+        <h2>اختيار الدكتور والربط بصفحة تكنولوجيا التعليم</h2>
+        <div id="doctorContent">
+          <p class="placeholder-text">
+            اختر الدكتور المناسب لمادتك أو أسلوب الشرح المفضل لديك، ويمكنك أيضاً الانتقال إلى صفحة <strong>question-bank.html</strong> المرتبطة بالمنصة.
+          </p>
+
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin-top: 14px;">
+            <div class="element-card doctor-profile-card active" data-doctor-name="د. نجوى الشامي" data-doctor-specialty="تكنولوجيا التعليم والحاسب الآلي" data-doctor-style="أكاديمي مبسّط وتوجيهي" data-doctor-rate="0.95" style="cursor: pointer;">
+              <div class="element-card-title">د. نجوى الشامي</div>
+              <div style="font-size: 0.85rem; color: #1d4ed8; font-weight: 600; margin-bottom: 4px;">تكنولوجيا التعليم والحاسب الآلي</div>
+              <div class="element-card-desc">إشراف وتوجيه علمي منظم يربط المفاهيم النظرية بالتطبيق العملي والتقويم.</div>
+            </div>
+
+           
+           
+
+           
+          </div>
+
+          <div id="selectedDoctorStatus" class="suggestion-answer-box" style="margin-top: 14px;">
+            الدكتور المختار حالياً: <strong>د. نجوى الشامي</strong> — التخصص: <strong>تكنولوجيا التعليم والحاسب الآلي</strong> — الأسلوب: <strong>أكاديمي مبسّط وتوجيهي</strong>.
+          </div>
+
+          <div style="margin-top: 14px; display: flex; gap: 10px; flex-wrap: wrap;">
+            <a class='primary-btn' href='/question-bank' style='text-decoration: none; display: inline-block;'>
+              فتح صفحة تكنولوجيا التعليم
+            </a>
+            <a class='secondary-btn' href='/question-bank' rel='noopener noreferrer' style='text-decoration: none; display: inline-block;' target='_blank'>
+              فتح في نافذة جديدة
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    (function () {
+      const DOCTOR_STORAGE_KEY = "eduspark_selected_doctor_v1";
+      const defaultDoctor = {
+        name: "د. نجوى الشامي",
+        specialty: "تكنولوجيا التعليم والحاسب الآلي",
+        style: "أكاديمي مبسّط وتوجيهي",
+        rate: 0.95
+      };
+
+      function getSavedDoctor() {
+        try {
+          const parsed = JSON.parse(localStorage.getItem(DOCTOR_STORAGE_KEY) || "null");
+          if (parsed && parsed.name) return parsed;
+        } catch (e) {}
+        return defaultDoctor;
+      }
+
+      function syncDoctorUi(doc) {
+        const badge = document.getElementById("headerDoctorBadge");
+        if (badge) badge.textContent = `👨‍🏫 الدكتورة: ${doc.name}`;
+
+        const statusBox = document.getElementById("selectedDoctorStatus");
+        if (statusBox) {
+          statusBox.innerHTML = `الدكتور المختار حالياً: <strong>${doc.name}</strong> — التخصص: <strong>${doc.specialty}</strong> — الأسلوب: <strong>${doc.style}</strong>.`;
+        }
+
+        document.querySelectorAll(".doctor-profile-card").forEach((card) => {
+          card.classList.toggle("active", card.dataset.doctorName === doc.name);
+        });
+      }
+
+      document.addEventListener("DOMContentLoaded", () => {
+        const currentDoc = getSavedDoctor();
+        syncDoctorUi(currentDoc);
+
+        document.querySelectorAll(".doctor-profile-card").forEach((card) => {
+          card.addEventListener("click", () => {
+            const chosen = {
+              name: card.dataset.doctorName || defaultDoctor.name,
+              specialty: card.dataset.doctorSpecialty || defaultDoctor.specialty,
+              style: card.dataset.doctorStyle || defaultDoctor.style,
+              rate: Number(card.dataset.doctorRate) || 0.95
+            };
+            localStorage.setItem(DOCTOR_STORAGE_KEY, JSON.stringify(chosen));
+            syncDoctorUi(chosen);
+          });
+        });
+      });
+    })();
+  </script>
+  <script src="app.js"></script>
+</body>
+</html><script async src="/.netlify/scripts/hud?variant=public" data-nf-variant="public" data-netlify-site-id="1ae80632-5a0a-4fea-bafa-52f0a37c5cf9" data-app-host="app.netlify.com" data-account-tier="free"></script>
